@@ -1,0 +1,132 @@
+<html>
+<title>
+    catch em all
+</title>
+
+<body>
+    <canvas style="border:5px solid black" height="900" width="1600" id="ctx" />
+    <script>
+        var canvas = document.getElementById("ctx")
+        var ctx = canvas.getContext("2d")
+        var background = new Image()
+        var tileImage = new Image()
+        var tileW = 100
+        var tileH = 20
+        var catcherStatic = new Image()
+        var catcherOpen = new Image()
+        var catcher = {
+            x: 100,
+            y: 750,
+            w: 50,
+            h: 50,
+            leftPressed: false,
+            rightPressed: false,
+            spd: 10,
+            eyeOpen: false
+        }
+        var tileList = []
+        var maxHeight = 15
+        var currentHeight = 0
+        var gngUp = false
+        var onAir = false
+
+        var drawObject = function(object, x, y, w, h) {
+            ctx.drawImage(object, x, y, w, h)
+        }
+
+        background.onload = function() {
+            tileImage.onload = function() {
+                catcherStatic.onload = function() {
+                    catcherOpen.onload = function() {
+                        document.onkeydown = function(event) {
+                            if (event.keyCode == 37 && catcher.x > 0) {
+
+                                catcher.leftPressed = true;
+                            }
+                            if (event.keyCode == 39 && catcher.x < canvas.width - catcher.w) {
+
+                                catcher.rightPressed = true;
+                            }
+                            if (event.keyCode == 38 && !onAir) {
+                                onAir = true
+                                gngUp = true
+                            }
+                        }
+                        document.onkeyup = function(event) {
+                            if (event.keyCode == 37) {
+                                catcher.leftPressed = false;
+                            }
+                            if (event.keyCode == 39) {
+                                catcher.rightPressed = false;
+                            }
+                        }
+
+                        var jump = function() {
+                            if (currentHeight > maxHeight) {
+                                gngUp = false
+                            }
+                            if (currentHeight < 0) {
+                                onAir = false
+                                currentHeight = 0
+                            }
+                            if (gngUp == true && onAir == true) {
+                                catcher.y -= currentHeight
+                                currentHeight++
+
+                            }
+                            if (gngUp == false && onAir == true) {
+
+                                catcher.y += (maxHeight - currentHeight)
+                                currentHeight--
+                            }
+                        }
+
+                        var updatePos = function() {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height)
+                            drawObject(background, 0, 0, canvas.width, canvas.height)
+
+                            for (var i = 0; i < 16; i++) {
+                                tileList.push({
+                                    x: i * tileW,
+                                    y: 800,
+                                })
+                            }
+
+                            for (i = 0; i < tileList.length; i++) {
+                                drawObject(tileImage, tileList[i].x, tileList[i].y, tileW, tileH)
+                            }
+
+                            if (Math.round(Math.random() * 100) % 2 == 0) {
+                                catcher.eyeOpen = true
+                            }
+                            if (onAir == true) {
+                                jump()
+                            }
+                            if (catcher.leftPressed && catcher.x > 0) {
+                                catcher.x -= catcher.spd
+                            }
+                            if (catcher.rightPressed && catcher.x < canvas.width - catcher.w) {
+                                catcher.x += catcher.spd
+                            }
+                            if (catcher.eyeOpen == true) {
+                                drawObject(catcherStatic, catcher.x, catcher.y, catcher.w, catcher.h)
+                                catcher.eyeOpen = false
+                            } else {
+                                drawObject(catcherOpen, catcher.x, catcher.y, catcher.w, catcher.h)
+                                catcher.eyeOpen = true
+                            }
+                        }
+
+                        setInterval(updatePos, 5)
+                    }
+                    catcherOpen.src = "images/catcher2.png"
+                }
+                catcherStatic.src = "images/catcher1.png"
+            }
+            tileImage.src = "images/tile.png"
+        }
+        background.src = "images/background.jpg"
+    </script>
+</body>
+
+</html>
